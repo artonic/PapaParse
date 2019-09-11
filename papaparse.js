@@ -495,9 +495,18 @@ License: MIT
 			// First chunk pre-processing
 			if (this.isFirstChunk && isFunction(this._config.beforeFirstChunk))
 			{
-				var modifiedChunk = this._config.beforeFirstChunk(chunk);
-				if (modifiedChunk !== undefined)
-					chunk = modifiedChunk;
+				var result = this._config.beforeFirstChunk(chunk);
+				if (result.action === 'abort') {
+					this._finished = true
+					this._completeResults.meta.aborted = true
+					if (isFunction(this._config.complete)) {
+						this._config.complete(this._completeResults)
+					}
+					return
+				}
+				if (result.chunk !== undefined) {
+					chunk = result.chunk;
+				}
 			}
 			this.isFirstChunk = false;
 			this._halted = false;
